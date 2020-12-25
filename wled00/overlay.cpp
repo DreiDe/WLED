@@ -33,6 +33,100 @@ void handleOverlays()
 }
 
 
+
+void drawWordClock(int hour, int minute) { 
+
+int time_dots[4] = {113, 110, 111, 112};
+
+int time_it_is[5] = {9, 10, 30, 49, 50}; // es ist
+	
+int time_minutes[12][12] = {
+  {80, 99, 100,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1}, // uhr
+  {  70,   89,   90,  109,  73,  86,  93,  106,  -1,  -1,  -1,  -1}, // fünf nach
+  { 8,  11,  28,  31,  73,  86,  93,  106,  -1,  -1,  -1,  -1}, // zehn nach
+  { 47,  52,  67,  72,  87,  92,  107,  73,  86,  93,  106,  -1}, // viertel nach
+  { 8,  11,  28,  31,  6,  13,  26,  5,  14,  25,  34,  -1}, // zehn vor halb
+  {  70,   89,   90,  109,  6,  13,  26,  5,  14,  25,  34,  -1}, // fünf vor halb
+  { 5,  14,  25,  34,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1}, // halb
+  {  70,   89,   90,  109,  73,  86,  93,  106,  5,  14,  25,  34}, // fünf nach halb
+  { 8,  11,  28,  31,  73,  86,  93,  106,  5,  14,  25,  34}, // zehn nach halb
+  { 7,  12,  27,  32,  47,  52,  67,  72,  87,  92,  107,  -1}, // dreiviertel
+  { 8,  11,  28,  31,  6,  13,  26,  -1,  -1,  -1,  -1,  -1}, // zehn vor
+  {  70,   89,   90,  109,  6,  13,  26,  -1,  -1,  -1,  -1,  -1}  // fünf vor
+};
+
+int time_hours[13][6] = {
+  { 61,  78,  81,  98,  101,  -1}, // zwölf
+  { 4,  15,  24,  35,  -1,  -1}, // eins
+  { 75,  84,  95,  104,  -1,  -1}, // zwei
+  { 3,  16,  23,  36,  -1,  -1}, // drei
+  { 76,  83,  96,  103,  -1,  -1}, // vier
+  { 74,  85,  94,  105,  -1,  -1}, // fünf
+  { 2, 17, 22, 37, 42,  -1}, // sechs
+  { 1,  18,  21,  38,  41,  58}, // sieben
+  { 77,  82,  97,  102,  -1,  -1}, // acht
+  { 39,  40,  59,  60,  -1,  -1}, // neun
+  { 0,  19,  20,  39,  -1,  -1}, // zehn
+  { 54,  65,  74,  -1,  -1,  -1},  // elf
+  { 4,  15,  24,  -1,  -1,  -1}, // ein
+};
+
+  int allLED[114];
+  int singleMinute = minute % 5;
+  
+  minute -= singleMinute;
+  
+  if(minute < 15) {
+	hour -= 1;
+  }
+
+  minute = minute / 5;
+
+  for (int i = 0; i < 114; i++) { // array mit 0 intialisieren
+        allLED[i] = 0;
+  }
+
+  for(int i = 0; i < 5; i++) { //es ist, immer an
+    allLED[time_it_is[i]] = 1;
+  }
+
+for(int i = 0; i < 12; i++){ // minuten in 5er schritten setzen
+  if(time_minutes[minute][i] >= 0){
+    allLED[time_minutes[minute][i]] = 1;
+  }
+}
+
+  if(minute == 0 && hour == 1){ //ein uhr, nicht eins uhr
+  for(int i = 0; i < 6; i++) {
+      if(time_minutes[minute][i] >= 0){
+    allLED[time_hours[12][i]] = 1;
+      }
+  }
+}
+else{
+    for(int i = 0; i < 6; i++) {
+        if(time_minutes[minute][i] >= 0){
+    allLED[time_hours[hour][i]] = 1;
+        }
+  } 
+}
+
+for( int i = 0; i < singleMinute; i++){ // Eckpunkte mit Minuten
+  allLED[time_dots[i]] = 1;
+}
+
+for(int i = 0; i < 114; i++){ // nicht verwendete leds ausschalten
+  if(allLED[i] == 0){
+      strip.setPixelColor(i, 0x000000);
+  }
+}
+}
+
+void _overlayWordClock()
+{
+drawWordClock(hourFormat12(localTime), minute(localTime));
+}
+
 void _overlayAnalogClock()
 {
   int overlaySize = overlayMax - overlayMin +1;
@@ -126,6 +220,7 @@ void handleOverlayDraw() {
   {
     case 1: _overlayAnalogClock(); break;
     case 3: _drawOverlayCronixie(); break;
+    case 4: _overlayWordClock(); break;
   }
 }
 
